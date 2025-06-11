@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <iostream>
 #include <cstring>
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
@@ -14,7 +14,7 @@ layout (location = 0) in vec3 pos;
 
 void main()
 {
-    gl_Position = vec4(0.4 * pos.x, 0.4 * pos.y, pos.z, 1.0);
+    gl_Position = vec4(0.4 * pos.x, 0.7 * pos.y, pos.z, 1.0);
 }
 )VOGON";
 
@@ -67,7 +67,7 @@ void addShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
     GLint result = 0;
     GLchar eLog[1024] = { 0 };
 
-    glGetProgramiv(theShader, GL_COMPILE_STATUS, &result);
+    glGetShaderiv(theShader, GL_COMPILE_STATUS, &result);
     if (!result)
     {
         glGetShaderInfoLog(theShader, sizeof(eLog), NULL, eLog);
