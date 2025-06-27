@@ -3,9 +3,11 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include "glm.hpp"
+#include "gtc/matrix_transform.hpp"
+#include "gtc/type_ptr.hpp"
 
 const GLint WIDTH = 800, HEIGHT = 600;
-GLuint VAO, VBO, shader, uniformXMove;
+GLuint VAO, VBO, shader, uniformModel;
 
 bool direction = true;
 float triOffset = 0.0f;
@@ -18,11 +20,11 @@ static const char* vShader = R"VOGON(
 
 layout (location = 0) in vec3 pos;
 
-uniform float xMove;
+uniform mat4 model;
 
 void main()
 {
-    gl_Position = vec4(0.4 * pos.x + xMove, 0.7 * pos.y, pos.z, 1.0);
+    gl_Position = model * vec4(0.4 * pos.x, 0.7 * pos.y, pos.z, 1.0);
 }
 )VOGON";
 
@@ -67,7 +69,7 @@ void addShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
     theCode[0] = shaderCode;
 
     GLint codeLength[1];
-    codeLength[0] = strlen(shaderCode);
+    codeLength[0] = static_cast<GLint>(strlen(shaderCode));
 
     glShaderSource(theShader, 1, theCode, codeLength);
     glCompileShader(theShader);
@@ -120,7 +122,7 @@ void compileShaders()
         return;
     }
 
-    uniformXMove = glGetUniformLocation(shader, "xMove");
+    uniformModel = glGetUniformLocation(shader, "model");
 }
 
 int main()
@@ -194,7 +196,11 @@ int main()
 
         glUseProgram(shader);
 
-        glUniform1f(uniformXMove, triOffset);
+        glm::mat4 model(1.0);
+        model = glm::translate(model, {triOffset, 0.0f, 0.0f});
+
+        // glUniform1f(uniformModel, triOffset);
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
