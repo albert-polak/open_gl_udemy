@@ -2,6 +2,7 @@
 #include <cstring>
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
+#include "glm.hpp"
 
 const GLint WIDTH = 800, HEIGHT = 600;
 GLuint VAO, VBO, shader, uniformXMove;
