@@ -32,22 +32,30 @@ static const char* vShader = R"VOGON(
 
 layout (location = 0) in vec3 pos;
 
+out vec4 vCol;
+out mat4 vModel;
+
 uniform mat4 model;
 
 void main()
 {
     gl_Position = model * vec4(pos.x, pos.y, pos.z, 1.0);
+    vCol = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);
+    vModel = model;
 }
 )VOGON";
 
 static const char* fShader = R"VOGON(
 #version 330
 
+in vec4 vCol;
+in mat4 vModel;
+
 out vec4 colour;
 
 void main()
 {
-    colour = vec4(1.0, 0.0, 0.0, 1.0);
+    colour = vCol*vModel;
 }
 )VOGON";
 
