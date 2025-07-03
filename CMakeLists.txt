@@ -17,7 +17,7 @@ link_directories(
     "external_libs/glew-2.1.0-lib/lib/Release/x64"
 )
 
-add_executable(openglApp main.cpp)
+add_executable(openglApp main.cpp mesh.cpp)
 
 target_link_libraries(openglApp PUBLIC
     glew32
