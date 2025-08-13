@@ -22,6 +22,7 @@ add_executable(
     main.cpp
     mesh.cpp
     shader.cpp
+    gl_window.cpp
 )
 
 target_link_libraries(openglApp PUBLIC

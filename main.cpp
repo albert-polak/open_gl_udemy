@@ -7,6 +7,7 @@
 #include "gtc/type_ptr.hpp"
 #include <vector>
 
+#include "gl_window.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
 
@@ -32,35 +33,9 @@ float scaleIncrement = 0.001f;
 
 
 // vertex shader
-static const char* vShader = R"VOGON(
-#version 330
+static const char* vShader = "shaders/shader.vert";
 
-layout (location = 0) in vec3 pos;
-
-out vec4 vCol;
-
-uniform mat4 model;
-uniform mat4 projection;
-
-void main()
-{
-    gl_Position = projection * model * vec4(pos.x, pos.y, pos.z, 1.0);
-    vCol = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);
-}
-)VOGON";
-
-static const char* fShader = R"VOGON(
-#version 330
-
-in vec4 vCol;
-
-out vec4 colour;
-
-void main()
-{
-    colour = vCol;
-}
-)VOGON";
+static const char* fShader = "shaders/shader.frag";
 
 void createObjects()
 {
@@ -79,70 +54,35 @@ void createObjects()
     };
 
     Mesh* obj1 = new Mesh();
+    Mesh* obj2 = new Mesh();
     obj1->createMesh(vertices, indices, 12, 12);
+    obj1->createMesh(vertices, indices, 12, 12);
+    obj2->createMesh(vertices, indices, 12, 12);
+    obj2->createMesh(vertices, indices, 12, 12);
     meshList.push_back(obj1);
+    meshList.push_back(obj2);
 }
 
 void createShaders()
 {
     Shader *shader1 = new Shader();
-    shader1->createFromString(vShader, fShader);
+    shader1->createFromFiles(vShader, fShader);
     shaderList.push_back(shader1);
 }
 
 int main()
 {
-    // init glfw
-    if (!glfwInit())
-    {
-        printf("GLFW initialization failed...");
-        glfwTerminate();
-        return 1;
-    }
-
-    // setup window properties
-    // opengl version
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
-    GLFWwindow* mainWindow = glfwCreateWindow(WIDTH, HEIGHT, "myapp", nullptr, nullptr);
-
-    if (!mainWindow)
-    {
-        printf("GLFW error creating window...");
-        glfwTerminate();
-        return 1;
-    }
-
-    int bufferHeight, bufferWidth;
-    glfwGetFramebufferSize(mainWindow, &bufferWidth, &bufferHeight);
-
-    glfwMakeContextCurrent(mainWindow);
-
-    glewExperimental = GL_TRUE;
-
-    if (glewInit() != GLEW_OK)
-    {
-        printf("GLEW init error...");
-        glfwDestroyWindow(mainWindow);
-        glfwTerminate();
-        return 1;
-    }
-
-    glEnable(GL_DEPTH_TEST);
-
-    glViewport(0, 0, bufferWidth, bufferHeight);
+    auto mainWindow = Window(WIDTH, HEIGHT);
+    mainWindow.initialize();
 
     createObjects();
     createShaders();
 
     GLuint uniformProjection = 0, uniformModel = 0;
 
-    glm::mat4 projection = glm::perspective(45.0f, (GLfloat)bufferWidth/(GLfloat)bufferHeight, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(45.0f, (GLfloat)mainWindow.getBufferWidth()/(GLfloat)mainWindow.getBufferHeight(), 0.1f, 100.0f);
 
-    while (!glfwWindowShouldClose(mainWindow))
+    while (!mainWindow.getShouldClose())
     {
         // user inputs
         glfwPollEvents();
@@ -198,17 +138,25 @@ int main()
 
             glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
             glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+            meshList[0]->renderMesh();
 
+            model = glm::mat4(1.0);
+            model = glm::translate(model, {-0.5, triOffset, -2.5f});
+            model = glm::rotate(model, curAngle * toRadians, {0, 1.0, 0});
+            model = glm::scale(model, {0.4, 0.4, 0.4});
+
+            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+
+            meshList[1]->renderMesh();
         }
 
-        for (auto mesh : meshList)
-        {
-            mesh->renderMesh();
-        }
+        // for (auto mesh : meshList)
+        // {
+        // }
 
         glUseProgram(0);
 
-        glfwSwapBuffers(mainWindow);
+        mainWindow.swapBuffers();
     }
 
     return 0;

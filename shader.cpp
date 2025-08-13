@@ -1,7 +1,6 @@
 #include "shader.hpp"
 
 #include <stdio.h>
-#include <string>
 #include <iostream>
 #include <fstream>
 
@@ -20,6 +19,38 @@ Shader::~Shader()
 void Shader::createFromString(const char* vertexCode, const char* fragmentCode)
 {
     compileShader(vertexCode, fragmentCode);
+}
+
+void Shader::createFromFiles(const char* vertexLocation, const char* fragmentLocation)
+{
+    std::string vertexString = readFile(vertexLocation);
+    std::string fragmentString = readFile(fragmentLocation);
+    const char* vertexCode = vertexString.c_str();
+    const char* fragmentCode = fragmentString.c_str();
+
+    compileShader(vertexCode, fragmentCode);
+}
+
+std::string Shader::readFile(const char* fileLocation)
+{
+    std::string content;
+    std::ifstream fileStream(fileLocation, std::ios::in);
+
+    if (!fileStream.is_open())
+    {
+        printf("Failed to read shader file: %s", fileLocation);
+        return "";
+    }
+
+    std::string line = "";
+    while (!fileStream.eof())
+    {
+        std::getline(fileStream, line);
+        content.append(line + "\n");
+    }
+
+    fileStream.close();
+    return content;
 }
 
 GLuint Shader::getProjectionLocation()
