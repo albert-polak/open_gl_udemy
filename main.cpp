@@ -6,16 +6,22 @@
 #include "gtc/matrix_transform.hpp"
 #include "gtc/type_ptr.hpp"
 #include <vector>
+#include <chrono>
 
 #include "gl_window.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
+#include "camera.hpp"
 
 const GLint WIDTH = 800, HEIGHT = 600;
 const float toRadians = 3.14159265f / 180.0f;
 
 std::vector<Mesh*> meshList;
 std::vector<Shader*> shaderList;
+Camera camera;
+
+GLfloat deltaTime = 0.0f;
+GLfloat lastTime = 0.0f;
 
 bool direction = true;
 float triOffset = 0.0f;
@@ -78,14 +84,24 @@ int main()
     createObjects();
     createShaders();
 
-    GLuint uniformProjection = 0, uniformModel = 0;
+    camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), 
+    glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 2.0f, 0.1f);
+
+    GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0;
 
     glm::mat4 projection = glm::perspective(45.0f, (GLfloat)mainWindow.getBufferWidth()/(GLfloat)mainWindow.getBufferHeight(), 0.1f, 100.0f);
 
     while (!mainWindow.getShouldClose())
     {
+        GLfloat now = static_cast<GLfloat>(glfwGetTime());
+        deltaTime = now - lastTime;
+        lastTime = now;
+
         // user inputs
         glfwPollEvents();
+
+        camera.keyControl(mainWindow.getKeys(), deltaTime);
+        camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 
         if (direction)
         {
@@ -130,6 +146,7 @@ int main()
             shader->useShader();
             uniformModel = shader->getModelLocation();
             uniformProjection = shader->getProjectionLocation();
+            uniformView = shader->getViewLocation();
 
             glm::mat4 model(1.0);
             model = glm::translate(model, {0.0, triOffset, -2.5f});
@@ -138,6 +155,7 @@ int main()
 
             glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
             glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+            glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
             meshList[0]->renderMesh();
 
             model = glm::mat4(1.0);

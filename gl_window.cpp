@@ -12,6 +12,9 @@ Window::Window(GLint windowWidth, GLint windowHeight)
     {
         keys[key_id] = 0;
     }
+
+    xChange = 0.0f;
+    yChange = 0.0f;
 }
 
 Window::~Window()
@@ -73,14 +76,14 @@ int Window::initialize()
 
 GLfloat Window::getXChange()
 {
-    GLfloat theChange = xChange;
+    GLfloat theChange = static_cast<GLfloat>(xChange);
     xChange = 0.0f;
     return theChange;
 }
 
 GLfloat Window::getYChange()
 {
-    GLfloat theChange = yChange;
+    GLfloat theChange = static_cast<GLfloat>(yChange);
     yChange = 0.0f;
     return theChange;
 }
@@ -88,6 +91,7 @@ GLfloat Window::getYChange()
 void Window::createCallbacks()
 {
     glfwSetKeyCallback(mainWindow, handleKeys);
+    glfwSetCursorPosCallback(mainWindow, handleMouse);
 }
 
 void Window::handleKeys(GLFWwindow* window, int key, int code, int action, int mode)
@@ -112,7 +116,7 @@ void Window::handleKeys(GLFWwindow* window, int key, int code, int action, int m
     }
 }
 
-void Window::handleMouse(GLFWwindow* window, GLfloat xPos, GLfloat yPos)
+void Window::handleMouse(GLFWwindow* window, double xPos, double yPos)
 {
     Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
     

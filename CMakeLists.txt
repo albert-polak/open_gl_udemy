@@ -22,6 +22,7 @@ add_executable(
     main.cpp
     mesh.cpp
     shader.cpp
+    camera.cpp
     gl_window.cpp
 )
 
