@@ -35,7 +35,7 @@ private:
 
     bool keys[1024];
 
-    double lastX, lastY, xChange, yChange = 0.0f;
+    double lastX = 0.0f, lastY = 0.0f, xChange = 0.0f, yChange = 0.0f;
     bool mouseFirstMoved = true;
 
     void createCallbacks();

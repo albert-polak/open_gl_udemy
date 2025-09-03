@@ -21,22 +21,41 @@ Camera::~Camera()
 void Camera::keyControl(bool* keys, GLfloat deltaTime)
 {
     GLfloat velocity = movementSpeed * deltaTime;
+    glm::vec3 direction{0.0f, 0.0f, 0.0f};
     if (keys[GLFW_KEY_W])
     {
-        position += front * velocity;
+        direction += front;
+        // position += front * velocity;
     }
     else if (keys[GLFW_KEY_S])
     {
-        position -= front * velocity;
+        direction -= front;
+        // position -= front * velocity;
     }
-    else if (keys[GLFW_KEY_A])
+    if (keys[GLFW_KEY_A])
     {
-        position -= right * velocity;
+        direction -= right;
+        // position -= right * velocity;
     }
     else if (keys[GLFW_KEY_D])
     {
-        position += right * velocity;
+        direction += right;
+        // position += right * velocity;
     }
+    if (keys[GLFW_KEY_SPACE])
+    {
+        direction += worldUp;
+        // position += up * velocity;
+    }
+    else if (keys[GLFW_KEY_LEFT_CONTROL])
+    {
+        direction -= worldUp;
+        // position -= up * velocity;
+    }
+    if (glm::length(direction) > 0.0f)
+        direction = glm::normalize(direction);
+
+    position += direction * velocity;
 }
 
 void Camera::mouseControl(GLfloat xChange, GLfloat yChange)
@@ -47,8 +66,14 @@ void Camera::mouseControl(GLfloat xChange, GLfloat yChange)
     yaw += xChange;
     pitch += yChange;
 
-    if (pitch > 89.0f) pitch = 89.0f;
-    if (pitch < -89.0f) pitch = -89.0f;
+    if (pitch > 89.0f)
+    {
+        pitch = 89.0f;
+    }
+    if (pitch < -89.0f)
+    {
+        pitch = -89.0f;
+    }
 
     update();
 }
@@ -60,9 +85,9 @@ glm::mat4 Camera::calculateViewMatrix()
 
 void Camera::update()
 {
-    front.x = cos(glm::radians(yaw) * cos(glm::radians(pitch)));
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     front.y = sin(glm::radians(pitch));
-    front.z = sin(glm::radians(yaw) * cos(glm::radians(pitch)));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     front = glm::normalize(front);
 
     right = glm::normalize(glm::cross(front, worldUp));
