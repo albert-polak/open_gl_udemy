@@ -17,12 +17,13 @@ public:
     GLuint getProjectionLocation();
     GLuint getModelLocation();
     GLuint getViewLocation();
+    GLuint getTextureLocation();
 
     void useShader();
     void clearShader();
 
 private:
-    GLuint shaderID, uniformProjection, uniformModel, uniformView;
+    GLuint shaderID, uniformProjection, uniformModel, uniformView, uniformTexture;
 
     void compileShader(const char* vertexCode, const char* fragmentCode);
     void addShader(GLuint theProgram, const char* shaderCode, GLenum shaderType);

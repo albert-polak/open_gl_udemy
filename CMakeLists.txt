@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.28)
 project(MyOpenGLApp)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 
 add_subdirectory("external_libs/glfw-3.4")
@@ -11,6 +11,7 @@ include_directories(
     "external_libs/glfw-3.4/include"
     "external_libs/glew-2.1.0-lib/include"
     "external_libs/glm"
+    "external_libs/stb"
 )
 
 link_directories(
@@ -24,6 +25,7 @@ add_executable(
     shader.cpp
     camera.cpp
     gl_window.cpp
+    texture.cpp
 )
 
 target_link_libraries(openglApp PUBLIC

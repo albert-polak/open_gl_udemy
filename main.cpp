@@ -1,3 +1,5 @@
+#define STB_IMAGE_IMPLEMENTATION
+
 #include <iostream>
 #include <cstring>
 #include "GL/glew.h"
@@ -12,6 +14,7 @@
 #include "mesh.hpp"
 #include "shader.hpp"
 #include "camera.hpp"
+#include "texture.hpp"
 
 const GLint WIDTH = 800, HEIGHT = 600;
 const float toRadians = 3.14159265f / 180.0f;
@@ -19,6 +22,9 @@ const float toRadians = 3.14159265f / 180.0f;
 std::vector<Mesh*> meshList;
 std::vector<Shader*> shaderList;
 Camera camera;
+
+Texture brickTexture;
+Texture soilTexture;
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastTime = 0.0f;
@@ -53,18 +59,18 @@ void createObjects()
     };
 
     GLfloat vertices[] = {
-        -1.0f, -1.0f, 0.0f,
-        0.0f, -1.0f, 1.0f,
-        1.0f, -1.0f, 0.0f,
-        0.0f, 1.0f, 0.0f
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, -1.0f, 1.0f, 0.5f, 0.0f,
+        1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.5f, 1.0f,
     };
 
     Mesh* obj1 = new Mesh();
     Mesh* obj2 = new Mesh();
-    obj1->createMesh(vertices, indices, 12, 12);
-    obj1->createMesh(vertices, indices, 12, 12);
-    obj2->createMesh(vertices, indices, 12, 12);
-    obj2->createMesh(vertices, indices, 12, 12);
+    obj1->createMesh(vertices, indices, 20, 12);
+    // obj1->createMesh(vertices, indices, 12, 12);
+    obj2->createMesh(vertices, indices, 20, 12);
+    // obj2->createMesh(vertices, indices, 12, 12);
     meshList.push_back(obj1);
     meshList.push_back(obj2);
 }
@@ -87,7 +93,12 @@ int main()
     camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), 
     glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 2.0f, 0.1f);
 
-    GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0;
+    brickTexture = Texture("textures/brick.jpg");
+    soilTexture = Texture("textures/soil.jpg");
+    brickTexture.loadTexture();
+    soilTexture.loadTexture();
+
+    GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformTexture = 0;
 
     glm::mat4 projection = glm::perspective(45.0f, (GLfloat)mainWindow.getBufferWidth()/(GLfloat)mainWindow.getBufferHeight(), 0.1f, 100.0f);
 
@@ -103,14 +114,14 @@ int main()
         camera.keyControl(mainWindow.getKeys(), deltaTime);
         camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 
-        if (direction)
-        {
-            triOffset += triIncrement;
-        }
-        else
-        {
-            triOffset -= triIncrement;
-        }
+        // if (direction)
+        // {
+        //     triOffset += triIncrement;
+        // }
+        // else
+        // {
+        //     triOffset -= triIncrement;
+        // }
 
         if(abs(triOffset) >=  triMaxOffset)
         {
@@ -147,15 +158,18 @@ int main()
             uniformModel = shader->getModelLocation();
             uniformProjection = shader->getProjectionLocation();
             uniformView = shader->getViewLocation();
+            uniformTexture = shader->getTextureLocation();
 
             glm::mat4 model(1.0);
-            model = glm::translate(model, {0.0, triOffset, -2.5f});
+            // model = glm::translate(model, {0.0, triOffset, -2.5f});
             model = glm::rotate(model, curAngle * toRadians, {0, 1.0, 0});
             model = glm::scale(model, {0.4, 0.4, 0.4});
 
             glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
             glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
             glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
+            brickTexture.useTexture();
+            glUniform1i(uniformTexture, 0);
             meshList[0]->renderMesh();
 
             model = glm::mat4(1.0);
@@ -165,6 +179,8 @@ int main()
 
             glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
+            soilTexture.useTexture();
+            glUniform1i(uniformTexture, 0);
             meshList[1]->renderMesh();
         }
 
