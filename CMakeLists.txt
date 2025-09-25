@@ -26,6 +26,7 @@ add_executable(
     camera.cpp
     gl_window.cpp
     texture.cpp
+    light.cpp
 )
 
 target_link_libraries(openglApp PUBLIC

@@ -15,6 +15,7 @@
 #include "shader.hpp"
 #include "camera.hpp"
 #include "texture.hpp"
+#include "light.hpp"
 
 const GLint WIDTH = 800, HEIGHT = 600;
 const float toRadians = 3.14159265f / 180.0f;
@@ -25,6 +26,8 @@ Camera camera;
 
 Texture brickTexture;
 Texture soilTexture;
+
+Light mainLight;
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastTime = 0.0f;
@@ -98,7 +101,9 @@ int main()
     brickTexture.loadTexture();
     soilTexture.loadTexture();
 
-    GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformTexture = 0;
+    mainLight = Light(1.0f, 1.0f, 1.0f, 0.2f);
+
+    GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformTexture = 0, uniformAmbientIntensity = 0, uniformAmbientColour = 0;
 
     glm::mat4 projection = glm::perspective(45.0f, (GLfloat)mainWindow.getBufferWidth()/(GLfloat)mainWindow.getBufferHeight(), 0.1f, 100.0f);
 
@@ -159,6 +164,9 @@ int main()
             uniformProjection = shader->getProjectionLocation();
             uniformView = shader->getViewLocation();
             uniformTexture = shader->getTextureLocation();
+            uniformAmbientColour = shader->getAmbientColourLocation();
+            uniformAmbientIntensity = shader->getAmbientIntensityLocation();
+            mainLight.useLight(uniformAmbientIntensity, uniformAmbientColour);
 
             glm::mat4 model(1.0);
             // model = glm::translate(model, {0.0, triOffset, -2.5f});
